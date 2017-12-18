@@ -5,8 +5,10 @@ from datetime import date, datetime
 
 from flask import Flask, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:////tmp/flask_app.db')
 

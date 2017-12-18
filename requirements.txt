@@ -1,4 +1,5 @@
 click==6.6
+Flask-Cors==3.0.3
 Flask-SQLAlchemy==2.1
 Flask==0.11.1
 gunicorn==19.6.0
