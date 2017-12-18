@@ -52,7 +52,7 @@ def all_comics_for_series(series):
     return comics
 
 
-@app.route('/series/<series_id>', methods=['GET'])
+@app.route('/series/<series_id>/', methods=['GET'])
 def series(series_id):
     api = get_api()
     series = api.series(series_id)
