@@ -67,6 +67,7 @@ def series(series_id):
     if response:
         return response
 
+    raise Exception('Turning off API requests while I wait for rate limiter to expire')
     print('Fetching series {} from API'.format(series_id))
     api = get_api()
     series = api.series(series_id)
