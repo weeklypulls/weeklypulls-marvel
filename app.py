@@ -38,7 +38,10 @@ def all_comics_for_series(series):
     offset = 0
     total = None
     comics = []
+    fetches = 0
+
     while total is None or len(comics) < total:
+        print('Fetching {} comics from {} offset, out of {}'.format(LIMIT, offset, total))
         response = series.comics({
             'format': 'comic',
             'formatType': 'comic',
@@ -50,6 +53,10 @@ def all_comics_for_series(series):
         comics += response.comics
         total = response.response['data']['total']
         offset += LIMIT
+        fetches += 1
+
+        if fetches > 5:
+            break
 
     return comics
 
