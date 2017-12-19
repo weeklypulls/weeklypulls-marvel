@@ -1,9 +1,8 @@
-Flask Heroku Sample
-====================
+Weekly Pulls - Marvel
+=====================
 
-A simple Python Flask example application that's ready to run on Heroku.
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+A simple Python Flask application for serving up Marvel comics information for
+my Weekly Pulls project.
 
 ## Development Setup
 
@@ -22,7 +21,3 @@ A simple Python Flask example application that's ready to run on Heroku.
 * `heroku addons:create heroku-postgresql:hobby-dev`
 
 * `git push heroku master`
-
-## Contributors
-
-* [Yefim](https://twitter.com/yefim)

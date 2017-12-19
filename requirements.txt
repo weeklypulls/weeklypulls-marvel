@@ -1,7 +1,6 @@
 click==6.6
 Flask-Cors==3.0.3
 Flask-Heroku-Cacheify==1.6.0
-Flask-SQLAlchemy==2.1
 Flask==0.11.1
 gunicorn==19.6.0
 itsdangerous==0.24
@@ -9,7 +8,6 @@ Jinja2==2.8
 MarkupSafe==0.23
 psycopg2==2.6.2
 pylibmc==1.5.2
-SQLAlchemy==1.1.3
 Werkzeug==0.11.11
 
 # marvelous==1.0.4

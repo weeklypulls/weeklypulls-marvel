@@ -5,18 +5,12 @@ from random import randint
 from datetime import date, datetime
 
 from flask import Flask, render_template
-from flask.ext.sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask.ext.cacheify import init_cacheify
 
 app = Flask(__name__)
 CORS(app)
 cache = init_cacheify(app)
-
-DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:////tmp/flask_app.db')
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-db = SQLAlchemy(app)
 
 
 def series_cache_time():
