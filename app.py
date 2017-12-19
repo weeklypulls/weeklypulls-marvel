@@ -6,9 +6,11 @@ from datetime import date, datetime
 from flask import Flask, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask.ext.cacheify import init_cacheify
 
 app = Flask(__name__)
 CORS(app)
+cache = init_cacheify(app)
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:////tmp/flask_app.db')
 
@@ -54,6 +56,10 @@ def all_comics_for_series(series):
 
 @app.route('/series/<series_id>/', methods=['GET'])
 def series(series_id):
+    response = cache.get(series_id)
+    if response:
+        return response
+
     api = get_api()
     series = api.series(series_id)
 
@@ -74,8 +80,9 @@ def series(series_id):
             'images': comic.images,
         })
 
-    return json.dumps(response, default=json_serial)
-
+    response_json = json.dumps(response, default=json_serial)
+    cache.set(series_id, response_json, 120)
+    return response_json
 
 
 @app.route('/', methods=['GET'])
