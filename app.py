@@ -6,7 +6,7 @@ from datetime import date, datetime
 
 from flask import Flask, render_template
 from flask_cors import CORS
-from flask.ext.cacheify import init_cacheify
+from flask_cacheify import init_cacheify
 
 app = Flask(__name__)
 CORS(app)
@@ -60,6 +60,7 @@ def series(series_id):
     if response:
         return response
 
+    print('Fetching series {} from API'.format(series_id))
     api = get_api()
     series = api.series(series_id)
 
