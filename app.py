@@ -1,6 +1,7 @@
 import os
 import marvelous
 import json
+from random import randint
 from datetime import date, datetime
 
 from flask import Flask, render_template
@@ -16,6 +17,11 @@ DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:////tmp/flask_app.db')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 db = SQLAlchemy(app)
+
+
+def series_cache_time():
+    ONE_DAY = 60 * 60 * 24
+    return randint(7, 14) * ONE_DAY
 
 
 def json_serial(obj):
@@ -81,7 +87,7 @@ def series(series_id):
         })
 
     response_json = json.dumps(response, default=json_serial)
-    cache.set(series_id, response_json, 120)
+    cache.set(series_id, response_json, series_cache_time())
     return response_json
 
 
