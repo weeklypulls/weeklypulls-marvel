@@ -67,7 +67,7 @@ def series(series_id):
     if response:
         return response
 
-    raise Exception('Turning off API requests while I wait for rate limiter to expire')
+    # raise Exception('Turning off API requests while I wait for rate limiter to expire')
     print('Fetching series {} from API'.format(series_id))
     api = get_api()
     series = api.series(series_id)
@@ -91,6 +91,41 @@ def series(series_id):
 
     response_json = json.dumps(response, default=json_serial)
     cache.set(series_id, response_json, series_cache_time())
+    return response_json
+
+
+@app.route('/weeks/<week_of>/', methods=['GET'])
+def weeks(week_of):
+    response = cache.get(week_of)
+    if response:
+        return response
+
+    print('Fetching week {} from API'.format(week_of))
+    api = get_api()
+    comics = api.comics({
+        'format': "comic",
+        'formatType': "comic",
+        'noVariants': True,
+        'dateRange': "{day},{day}".format(day=week_of),
+        'limit': 100
+    })
+
+    response = {
+        'week_of': week_of,
+        'comics': [],
+    }
+
+    for comic in comics:
+        response['comics'].append({
+            'id': comic.id,
+            'title': comic.title,
+            'on_sale': comic.dates.on_sale,
+            'series_id': comic.series.id,
+            'images': comic.images,
+        })
+
+    response_json = json.dumps(response, default=json_serial)
+    cache.set(week_of, response_json, series_cache_time())
     return response_json
 
 
