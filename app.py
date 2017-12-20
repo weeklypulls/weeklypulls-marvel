@@ -55,7 +55,8 @@ def all_comics_for_series(series):
         offset += LIMIT
         fetches += 1
 
-        if fetches > 3:
+        # Just a safety break. No comic has more than 1k issues
+        if fetches > 10:
             break
 
     return comics
