@@ -76,7 +76,7 @@ def series(series_id):
     response = {
         'title': series.title,
         'comics': [],
-        'series_id': series_id,
+        'series_id': series.id,
     }
 
     comics = all_comics_for_series(series)
@@ -86,7 +86,7 @@ def series(series_id):
             'id': comic.id,
             'title': comic.title,
             'on_sale': comic.dates.on_sale,
-            'series_id': comic.series.id,
+            'series_id': series.id,
             'images': comic.images,
         })
 
