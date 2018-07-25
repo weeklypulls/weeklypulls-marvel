@@ -18,6 +18,11 @@ def series_cache_time():
     return randint(7, 14) * ONE_DAY
 
 
+def week_of_cache_time():
+    ONE_DAY = 60 * 60 * 24
+    return ONE_DAY
+
+
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 
@@ -126,7 +131,7 @@ def weeks(week_of):
         })
 
     response_json = json.dumps(response, default=json_serial)
-    cache.set(week_of, response_json, series_cache_time())
+    cache.set(week_of, response_json, week_of_cache_time())
     return response_json
 
 
