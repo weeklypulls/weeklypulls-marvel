@@ -11,4 +11,4 @@ psycopg2==2.8.2
 pylibmc==1.5.2
 Werkzeug==0.15.2
 safety
-marvelous
+https://github.com/rkuykendall/marvelous/archive/master.zip
