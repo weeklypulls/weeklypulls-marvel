@@ -87,13 +87,12 @@ def series(series_id):
     comics = all_comics_for_series(series)
 
     for comic in comics:
-
         response['comics'].append({
             'id': comic.id,
             'title': comic.title,
             'on_sale': comic.dates.on_sale,
             'series_id': series.id,
-            'images': getattr(comic, 'images', None),
+            'images': comic.images,
         })
 
     response_json = json.dumps(response, default=json_serial)
@@ -128,7 +127,7 @@ def weeks(week_of):
             'title': comic.title,
             'on_sale': comic.dates.on_sale,
             'series_id': comic.series.id,
-            'images': getattr(comic, 'images', None),
+            'images': comic.images,
         })
 
     response_json = json.dumps(response, default=json_serial)
