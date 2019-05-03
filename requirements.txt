@@ -1,14 +1,14 @@
 click==6.6
 Flask-Cors==3.0.3
-Flask-Heroku-Cacheify==1.6.0
-Flask==0.11.1
-gunicorn==19.6.0
+# Flask-Heroku-Cacheify fixed to use Flask-Caching instead of dead Flask-Cache
+https://github.com/toyg/flask-heroku-cacheify/archive/master.zip
+Flask>=0.12.3
+gunicorn==19.9.0
 itsdangerous==0.24
-Jinja2==2.8
+Jinja2==2.10.1
 MarkupSafe==0.23
-psycopg2==2.6.2
+psycopg2==2.8.2
 pylibmc==1.5.2
-Werkzeug==0.11.11
-
-# marvelous==1.0.4
--e git+git://github.com/rkuykendall/marvelous.git#egg=marvelous
+Werkzeug==0.15.2
+safety
+https://github.com/rkuykendall/marvelous/archive/master.zip
