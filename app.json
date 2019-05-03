@@ -1,12 +1,13 @@
 {
-  "name": "Flask Heroku Sample",
-  "description": "A sample Flask app on Heroku",
+  "name": "WeeklyPulls",
+  "description": "Show weekly Marvel releases",
   "keywords": [
     "flask",
     "python",
-    "sample"
+    "marvel",
+    "weeklypulls"
   ],
-  "repository": "https://github.com/yefim/flask-heroku-sample",
+  "repository": "https://github.com/rkuykendall/weeklypulls-client",
   "addons": [
     "heroku-postgresql"
   ]
