@@ -1,26 +1,28 @@
-import os
-import marvelous
 import json
-from random import randint
+import os
 from datetime import date, datetime
+from random import randint
+from time import sleep
 
-from flask import Flask, render_template
-from flask_cors import CORS
+import marvelous
+from flask import Flask, render_template, abort
 from flask_cacheify import init_cacheify
+from flask_cors import CORS
+from marvelous.series import SeriesSchema
 
 app = Flask(__name__)
 CORS(app)
 cache = init_cacheify(app)
 
+_ONE_DAY_SECONDS = 60 * 60 * 24
+
 
 def series_cache_time():
-    ONE_DAY = 60 * 60 * 24
-    return randint(7, 14) * ONE_DAY
+    return randint(7, 14) * _ONE_DAY_SECONDS
 
 
 def week_of_cache_time():
-    ONE_DAY = 60 * 60 * 24
-    return ONE_DAY
+    return _ONE_DAY_SECONDS
 
 
 def json_serial(obj):
@@ -65,6 +67,63 @@ def all_comics_for_series(series):
             break
 
     return comics
+
+
+@app.route('/series/ongoing/', methods=['GET'])
+def ongoing_series():
+    """ Retrieve all series that are supposedly ongoing.
+    This call is *very* slow and expensive when not cached;
+    in practice, users should *never* get a non-cached response."""
+
+    response = cache.get('ongoing')
+    if response:
+        return response
+
+    app.logger.debug('Fetching ONGOING series from API, this will take a while...')
+    api = get_api()
+    # unfortunately, there is no alternative but to fetch them all (550 at the last check) and
+    # then filter the ones with endYear set to 2099. I asked Marvel to fix this but I bet they
+    # will never do it...
+    fetched = []
+    total = None
+    offset = 0
+    this_year = datetime.now().year
+    while total != offset:
+
+        series_list = api.series(params={'seriesType': 'ongoing',
+                                         'limit': 100,
+                                         'offset': offset})
+        if series_list['code'] != 200:
+            abort(422)  # sorry, we tried
+
+        data = series_list.get('data', {})
+        if total is None:
+            total = data.get('total', 0)
+        for series_dict in data.get('results', []):
+            if series_dict['endYear'] == 2099 or series_dict['endYear'] > this_year:
+                # fixme: the api wrapper should really do this for me...
+                series_obj = SeriesSchema().load(series_dict).data
+                # todo: decide an actual path for missing thumbnails
+                thumb_dict = series_dict.get('thumbnail',
+                                             {'path': '/path/to/icon/for/missing',
+                                              'extension': 'png'})
+                thumb_path = '.'.join([thumb_dict['path'],
+                                       thumb_dict['extension']])
+                output = {
+                    'title': series_obj.title,
+                    'series_id': series_obj.id,
+                    'thumb': thumb_path
+                }
+                fetched.append(output)
+        offset += data.get('count', 0)
+        app.logger.debug(f"fetched {offset} results...")
+        sleep(0.01)
+
+    app.logger.info(f'Completed "ongoing" call, found {len(fetched)} out of {total} series.')
+    response_json = json.dumps(fetched, default=json_serial)
+    cache.set('ongoing', response_json, series_cache_time())
+    del fetched  # let's hurry gc if at all possible...
+    return response_json
 
 
 @app.route('/series/<series_id>/', methods=['GET'])
