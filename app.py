@@ -2,19 +2,20 @@ import json
 import os
 from datetime import date, datetime
 from random import randint
-from time import sleep
 
 import marvelous
 from flask import Flask, render_template, abort
 from flask_cacheify import init_cacheify
 from flask_cors import CORS
-from marvelous.series import SeriesSchema
+from marvelous.exceptions import ApiError
 
 app = Flask(__name__)
 CORS(app)
 cache = init_cacheify(app)
 
 _ONE_DAY_SECONDS = 60 * 60 * 24
+# what to display when no thumbnail is available
+_IMAGE_NOT_FOUND = "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
 
 
 def series_cache_time():
@@ -85,45 +86,40 @@ def ongoing_series():
     # then filter the ones with endYear set to 2099. I asked Marvel to fix this but I bet they
     # will never do it...
     fetched = []
-    total = None
     offset = 0
+    num_records = 0
+    page_size = 100  # 100 is max
     this_year = datetime.now().year
-    while total != offset:
+    try:
+        while True:
+            series_list = api.series(params={'seriesType': 'ongoing',
+                                             'limit': page_size,
+                                             'offset': offset})
+            for series in series_list:
+                # ongoing series usually have endYear set to 2099
+                if series.endYear == 2099 or series.endYear > this_year:
+                    output = {
+                        'title': series.title,
+                        'series_id': series.id,
+                        'thumb': series.thumbnail or _IMAGE_NOT_FOUND
+                    }
+                    fetched.append(output)
+            # how many records we examined
+            num_records = offset + len(series_list)
+            app.logger.debug(f"fetched {num_records} results...")
+            # set the offset forward
+            offset += page_size
+            # if the number of records is lower than the next offset, we're done
+            if num_records < offset:
+                break
 
-        series_list = api.series(params={'seriesType': 'ongoing',
-                                         'limit': 100,
-                                         'offset': offset})
-        if series_list['code'] != 200:
-            abort(422)  # sorry, we tried
-
-        data = series_list.get('data', {})
-        if total is None:
-            total = data.get('total', 0)
-        for series_dict in data.get('results', []):
-            if series_dict['endYear'] == 2099 or series_dict['endYear'] > this_year:
-                # fixme: the api wrapper should really do this for me...
-                series_obj = SeriesSchema().load(series_dict).data
-                # todo: decide an actual path for missing thumbnails
-                thumb_dict = series_dict.get('thumbnail',
-                                             {'path': '/path/to/icon/for/missing',
-                                              'extension': 'png'})
-                thumb_path = '.'.join([thumb_dict['path'],
-                                       thumb_dict['extension']])
-                output = {
-                    'title': series_obj.title,
-                    'series_id': series_obj.id,
-                    'thumb': thumb_path
-                }
-                fetched.append(output)
-        offset += data.get('count', 0)
-        app.logger.debug(f"fetched {offset} results...")
-        sleep(0.01)
-
-    app.logger.info(f'Completed "ongoing" call, found {len(fetched)} out of {total} series.')
-    response_json = json.dumps(fetched, default=json_serial)
-    cache.set('ongoing', response_json, series_cache_time())
-    del fetched  # let's hurry gc if at all possible...
-    return response_json
+        app.logger.info(f'Completed "ongoing" call, found {len(fetched)} out of {num_records} series.')
+        response_json = json.dumps(fetched, default=json_serial)
+        cache.set('ongoing', response_json, series_cache_time())
+        return response_json
+    except ApiError as a:
+        app.logger.error(a.args)
+        return abort(422)
 
 
 @app.route('/series/<series_id>/', methods=['GET'])
@@ -141,6 +137,7 @@ def series(series_id):
         'title': series.title,
         'comics': [],
         'series_id': series.id,
+        'thumb': series.thumbnail or _IMAGE_NOT_FOUND
     }
 
     comics = all_comics_for_series(series)
