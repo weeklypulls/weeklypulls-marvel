@@ -7,8 +7,5 @@
     "marvel",
     "weeklypulls"
   ],
-  "repository": "https://github.com/rkuykendall/weeklypulls-client",
-  "addons": [
-    "heroku-postgresql"
-  ]
+  "repository": "https://github.com/rkuykendall/weeklypulls-client"
 }
