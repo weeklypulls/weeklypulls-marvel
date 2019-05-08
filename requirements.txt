@@ -11,4 +11,5 @@ psycopg2==2.8.2
 pylibmc==1.5.2
 Werkzeug==0.15.2
 safety
-https://github.com/rkuykendall/marvelous/archive/master.zip
+# temporarily using a fork of the lib
+https://github.com/toyg/marvelous/archive/additional_series_details.zip
