@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import date, datetime
+from operator import itemgetter
 from random import randint
 
 import marvelous
@@ -114,6 +115,7 @@ def ongoing_series():
                 break
 
         app.logger.info(f'Completed "ongoing" call, found {len(fetched)} out of {num_records} series.')
+        fetched.sort(key=itemgetter('title'))
         response_json = json.dumps(fetched, default=json_serial)
         cache.set('ongoing', response_json, series_cache_time())
         return response_json
