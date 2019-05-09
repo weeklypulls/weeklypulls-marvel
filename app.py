@@ -4,10 +4,11 @@ from datetime import date, datetime
 from operator import itemgetter
 from random import randint
 
-import marvelous
 from flask import Flask, render_template, abort
 from flask_cacheify import init_cacheify
 from flask_cors import CORS
+
+import marvelous
 from marvelous.exceptions import ApiError
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ cache = init_cacheify(app)
 
 _ONE_DAY_SECONDS = 60 * 60 * 24
 # what to display when no thumbnail is available
-_IMAGE_NOT_FOUND = "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
+_DEFAULT_IMG = "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
 
 
 def series_cache_time():
@@ -42,26 +43,26 @@ def get_api():
     return marvel_api
 
 
-def all_comics_for_series(series):
-    LIMIT = 100
+def all_comics_for_series(series_obj):
+    limit = 100
     offset = 0
     total = None
     comics = []
     fetches = 0
 
     while total is None or offset < total:
-        print('Fetching {} comics from {} offset, out of {}'.format(LIMIT, offset, total))
-        response = series.comics({
+        print(f'Fetching {limit} comics from {offset} offset, out of {total}')
+        response = series_obj.comics({
             'format': 'comic',
             'formatType': 'comic',
             'noVariants': True,
-            'limit': LIMIT,
+            'limit': limit,
             'offset': offset,
             'orderBy': 'issueNumber'
         })
         comics += response.comics
         total = response.response['data']['total']
-        offset += LIMIT
+        offset += limit
         fetches += 1
 
         # Just a safety break. No comic has more than 1k issues
@@ -81,28 +82,32 @@ def ongoing_series():
     if response:
         return response
 
-    app.logger.debug('Fetching ONGOING series from API, this will take a while...')
+    app.logger.debug('Fetching ONGOING series from API, '
+                     'this will take a while...')
     api = get_api()
-    # unfortunately, there is no alternative but to fetch them all (550 at the last check) and
-    # then filter the ones with endYear set to 2099. I asked Marvel to fix this but I bet they
-    # will never do it...
+    # unfortunately, there is no alternative but to fetch them all 
+    # (550 at last check) and then filter the ones with endYear set to 2099. 
+    # I asked Marvel to fix this but I bet they will never do it...
     fetched = []
     offset = 0
-    num_records = 0
     page_size = 100  # 100 is max
     this_year = datetime.now().year
     try:
         while True:
+            # Note that 'ongoing' seriesType just means the series was
+            # originally published as never-ending (as opposed to miniseries
+            # etc). E.g. Spectacular Spider-Man is 'ongoing' even though it
+            # has long been dead.
             series_list = api.series(params={'seriesType': 'ongoing',
                                              'limit': page_size,
                                              'offset': offset})
-            for series in series_list:
+            for series_obj in series_list:
                 # ongoing series usually have endYear set to 2099
-                if series.endYear == 2099 or series.endYear > this_year:
+                if series.endYear == 2099 or series_obj.endYear > this_year:
                     output = {
-                        'title': series.title,
-                        'series_id': series.id,
-                        'thumb': series.thumbnail or _IMAGE_NOT_FOUND
+                        'title': series_obj.title,
+                        'series_id': series_obj.id,
+                        'thumb': series_obj.thumbnail or _DEFAULT_IMG
                     }
                     fetched.append(output)
             # how many records we examined
@@ -110,11 +115,13 @@ def ongoing_series():
             app.logger.debug(f"fetched {num_records} results...")
             # set the offset forward
             offset += page_size
-            # if the number of records is lower than the next offset, we're done
+            # if the number of records is lower than the next offset, 
+            # we're done
             if num_records < offset:
                 break
 
-        app.logger.info(f'Completed "ongoing" call, found {len(fetched)} out of {num_records} series.')
+        app.logger.info(f'Completed "ongoing" call, '
+                        f'found {len(fetched)} out of {num_records} series.')
         fetched.sort(key=itemgetter('title'))
         response_json = json.dumps(fetched, default=json_serial)
         cache.set('ongoing', response_json, series_cache_time())
@@ -130,26 +137,25 @@ def series(series_id):
     if response:
         return response
 
-    # raise Exception('Turning off API requests while I wait for rate limiter to expire')
-    print('Fetching series {} from API'.format(series_id))
+    print(f'Fetching series {series_id} from API')
     api = get_api()
-    series = api.series(series_id)
+    series_obj = api.series(series_id)
 
     response = {
-        'title': series.title,
+        'title': series_obj.title,
         'comics': [],
-        'series_id': series.id,
-        'thumb': series.thumbnail or _IMAGE_NOT_FOUND
+        'series_id': series_obj.id,
+        'thumb': series_obj.thumbnail or _DEFAULT_IMG
     }
 
-    comics = all_comics_for_series(series)
+    comics = all_comics_for_series(series_obj)
 
     for comic in comics:
         response['comics'].append({
             'id': comic.id,
             'title': comic.title,
             'on_sale': comic.dates.on_sale,
-            'series_id': series.id,
+            'series_id': series_obj.id,
             'images': comic.images,
         })
 
@@ -164,7 +170,7 @@ def weeks(week_of):
     if response:
         return response
 
-    print('Fetching week {} from API'.format(week_of))
+    print(f'Fetching week {week_of} from API')
     api = get_api()
     comics = api.comics({
         'format': "comic",
