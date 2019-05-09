@@ -37,13 +37,23 @@ def json_serial(obj):
 
 
 def get_api():
+    """
+    Load the Marvel API wrapper
+    :return: :class:`marvelous.sessions.Session`
+    """
     public_key = os.environ['MAPI_PUBLIC_KEY']
     private_key = os.environ['MAPI_PRIVATE_KEY']
     marvel_api = marvelous.api(public_key, private_key)
     return marvel_api
 
 
-def all_comics_for_series(series_obj):
+def all_comics_for_series(series_obj: marvelous.Series):
+    """
+    Get all published or announced comics for a series.
+
+    :param series_obj: :class:`marvelous.Series` instance
+    :return: `list` of :class:`marvelous.Comic` instances
+    """
     limit = 100
     offset = 0
     total = None
@@ -76,7 +86,11 @@ def all_comics_for_series(series_obj):
 def ongoing_series():
     """ Retrieve all series that are supposedly ongoing.
     This call is *very* slow and expensive when not cached;
-    in practice, users should *never* get a non-cached response."""
+    in practice, users should *never* get a non-cached response.
+
+    :return: json list with subset representation of
+            :class:`marvelous.Series` instances
+    """
 
     response = cache.get('ongoing')
     if response:
@@ -133,6 +147,12 @@ def ongoing_series():
 
 @app.route('/series/<series_id>/', methods=['GET'])
 def series(series_id):
+    """
+    Given a numeric ID, return the Series instance
+
+    :param series_id: `int`
+    :return: json representing subset of :class:`marvelous.Series` instance
+    """
     response = cache.get(series_id)
     if response:
         return response
@@ -165,7 +185,13 @@ def series(series_id):
 
 
 @app.route('/weeks/<week_of>/', methods=['GET'])
-def weeks(week_of):
+def weeks(week_of: str):
+    """
+    Return all physical releases for the week containing the requested day
+
+    :param week_of: `str` of format `yyy-mm-dd`
+    :return: `json` with a subset of :class:`marvelous.Comic` details
+    """
     response = cache.get(week_of)
     if response:
         return response
@@ -201,6 +227,10 @@ def weeks(week_of):
 
 @app.route('/', methods=['GET'])
 def index():
+    """
+    Simple ping page
+    :return: index page
+    """
     return render_template('index.html')
 
 
