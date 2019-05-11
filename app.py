@@ -117,7 +117,7 @@ def ongoing_series():
                                              'offset': offset})
             for series_obj in series_list:
                 # ongoing series usually have endYear set to 2099
-                if series.endYear == 2099 or series_obj.endYear > this_year:
+                if series_obj.endYear == 2099 or series_obj.endYear > this_year:
                     output = {
                         'title': series_obj.title,
                         'series_id': series_obj.id,
