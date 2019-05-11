@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 from marvelous.exceptions import ApiError
 from query.series import get_ongoing, get_series_by_id
-from query.time import week_of_day
+from query.comics import week_of_day
 
 app = Flask(__name__)
 CORS(app)
