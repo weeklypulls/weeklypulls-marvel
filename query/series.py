@@ -61,7 +61,7 @@ def get_ongoing():
 
 
 def get_series_by_id(series_id):
-    print(f'Fetching series {series_id} from API')
+    logger.info(f'Fetching series {series_id} from API')
     api = get_api()
     series_obj = api.series(series_id)
 
@@ -83,3 +83,16 @@ def get_series_by_id(series_id):
             'images': comic.images,
         })
     return response
+
+
+def search_by_filter(params_dict):
+    logger.info(f'Fetching series with parameters: {params_dict}')
+    api = get_api()
+    found_series = api.series(params=params_dict)
+    fetched = [{
+        'title': series_obj.title,
+        'series_id': series_obj.id,
+        'thumb': series_obj.thumbnail or _DEFAULT_IMG
+    } for series_obj in found_series]
+    fetched.sort(key=itemgetter('title'))
+    return fetched

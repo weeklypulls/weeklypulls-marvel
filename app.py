@@ -3,13 +3,13 @@ import os
 from datetime import date, datetime
 from random import randint
 
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, request
 from flask_cacheify import init_cacheify
 from flask_cors import CORS
 
 from marvelous.exceptions import ApiError
-from query.series import get_ongoing, get_series_by_id
 from query.comics import week_of_day
+from query.series import get_ongoing, get_series_by_id, search_by_filter
 
 app = Flask(__name__)
 CORS(app)
@@ -94,6 +94,27 @@ def weeks(week_of: str):
     }
     response_json = json.dumps(response, default=json_serial)
     cache.set(week_of, response_json, week_of_cache_time())
+    return response_json
+
+
+@app.route('/search/series', methods=['GET'])
+def search_series():
+    # map our querystring to acceptable Marvel API filters
+    key_map = {'t': 'title'}
+    filter = {key_map[key]: request.args[key]
+              for key in key_map
+              if key in request.args}
+    # calculate an identifier to use with cache
+    flat_filter = '||'.join([
+        f'{key}::{value}' for key, value in filter.items()
+    ])
+    search_id = f'search__{flat_filter}'
+    response = cache.get(search_id)
+    if response:
+        return response
+    response = search_by_filter(filter)
+    response_json = json.dumps(response, default=json_serial)
+    cache.set(search_id, response_json, week_of_cache_time())
     return response_json
 
 

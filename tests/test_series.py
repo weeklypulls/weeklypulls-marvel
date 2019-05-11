@@ -65,8 +65,9 @@ def test_series_search(client):
     title = "Weapon X"
     result = client.get(f'/search/series?t={quote_plus(title)}')
     data = json.loads(result.data)
-    assert len(data) == 1
+    assert len(data) == 3
     assert _structure_matches(_SERIES_ATTRIBUTES, data)
+    assert all(title in comic['title'] for comic in data)
 
 
 @my_vcr.use_cassette
