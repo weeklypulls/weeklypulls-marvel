@@ -3,10 +3,9 @@ from datetime import datetime
 from operator import itemgetter
 
 from query.api import get_api, _DEFAULT_IMG
-
-# logging to the main logger for now
 from query.comics import all_comics_for_series
 
+# logging to the main logger for now
 logger = logging.getLogger('flask.app')
 
 
@@ -19,7 +18,7 @@ def get_ongoing():
     """
 
     logger.debug('Fetching ONGOING series from API, '
-                     'this will take a while...')
+                 'this will take a while...')
     api = get_api()
     # unfortunately, there is no alternative but to fetch them all
     # (550 at last check) and then filter the ones with endYear set to 2099.
@@ -60,6 +59,7 @@ def get_ongoing():
     fetched.sort(key=itemgetter('title'))
     return fetched
 
+
 def get_series_by_id(series_id):
     print(f'Fetching series {series_id} from API')
     api = get_api()
@@ -83,5 +83,3 @@ def get_series_by_id(series_id):
             'images': comic.images,
         })
     return response
-
-
