@@ -37,6 +37,9 @@ def test_series_by_id(client):
     assert data['series_id'] == series_id
     assert data['title'] == series_title
     assert len(data['comics']) == 27
+    required_keys = ['id', 'title','on_sale','series_id','images']
+    assert all(key in comic for key in required_keys
+               for comic in data['comics'])
 
 
 @my_vcr.use_cassette
