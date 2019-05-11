@@ -2,14 +2,14 @@ import json
 from datetime import datetime
 from urllib.parse import quote_plus
 
+import arrow as arrow
 import pytest
-import vcr
 from vcr import VCR
 
 import app
 
 # configure http recorder
-my_vcr = vcr.VCR(
+my_vcr = VCR(
     cassette_library_dir='tests/cassettes',
     record_mode='once',
     serializer='json',
@@ -20,6 +20,14 @@ my_vcr = vcr.VCR(
                              ('ts', '2019-05-0501:01:01'),
                              ('hash', 'deadbeef')]
 )
+
+_COMICS_ATTRIBUTES = ['id', 'title', 'on_sale', 'series_id', 'images']
+_SERIES_ATTRIBUTES = ['title', 'series_id', 'thumb']
+
+
+def _structure_matches(attrs, list_of_dicts):
+    return all(key in obj for key in attrs
+               for obj in list_of_dicts)
 
 
 @pytest.fixture
@@ -36,20 +44,19 @@ def test_series_by_id(client):
     data = json.loads(result.data)
     assert data['series_id'] == series_id
     assert data['title'] == series_title
+    assert _structure_matches(_SERIES_ATTRIBUTES, [data])
     assert len(data['comics']) == 27
-    required_keys = ['id', 'title','on_sale','series_id','images']
-    assert all(key in comic for key in required_keys
-               for comic in data['comics'])
+    assert _structure_matches(_COMICS_ATTRIBUTES, data['comics'])
 
 
 @my_vcr.use_cassette
 def test_series_ongoing(client):
-    """ this only tests output dicts are compliant, not that the returned series are correct"""
+    """ this only tests output dicts are compliant,
+    not that the returned series are correct"""
     result = client.get(f'/series/ongoing', follow_redirects=True)
     data = json.loads(result.data)
     this_year = datetime.now().year
-    required_keys = ['title', 'series_id', 'thumb']
-    assert all(all(key in d for key in required_keys) for d in data)
+    assert _structure_matches(_SERIES_ATTRIBUTES, data)
 
 
 @my_vcr.use_cassette
@@ -59,4 +66,16 @@ def test_series_search(client):
     result = client.get(f'/search/series?t={quote_plus(title)}')
     data = json.loads(result.data)
     assert len(data) == 1
-    assert title in data[0]['title']
+    assert _structure_matches(_SERIES_ATTRIBUTES, data)
+
+
+@my_vcr.use_cassette
+def test_get_week(client):
+    day = '2019-05-08'
+    result = client.get(f'/weeks/{day}/', follow_redirects=True)
+    data = json.loads(result.data)
+    assert len(data['comics']) == 21
+    assert _structure_matches(_COMICS_ATTRIBUTES, data['comics'])
+    start, end = arrow.get(day).span('week')
+    assert all(start <= arrow.get(comic['on_sale']) <= end
+               for comic in data['comics'])
