@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 from urllib.parse import quote_plus
 
 import arrow as arrow
@@ -55,7 +54,6 @@ def test_series_ongoing(client):
     not that the returned series are correct"""
     result = client.get(f'/series/ongoing', follow_redirects=True)
     data = json.loads(result.data)
-    this_year = datetime.now().year
     assert _structure_matches(_SERIES_ATTRIBUTES, data)
 
 
