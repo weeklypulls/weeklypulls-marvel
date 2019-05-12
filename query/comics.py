@@ -30,7 +30,7 @@ def week_of_day(day):
     return fetched
 
 
-def all_comics_for_series(series_obj: marvelous.Series):
+def all_comics_for_series(series_obj):
     """
     Get all published or announced comics for a series.
 
