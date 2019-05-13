@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from operator import itemgetter
 
-from query.api import get_api, _DEFAULT_IMG
+from query.api import get_api, _DEFAULT_IMG, make_comic_dict
 from query.comics import all_comics_for_series
 
 # logging to the main logger for now
@@ -75,13 +75,7 @@ def get_series_by_id(series_id):
     comics = all_comics_for_series(series_obj)
 
     for comic in comics:
-        response['comics'].append({
-            'id': comic.id,
-            'title': comic.title,
-            'on_sale': comic.dates.on_sale,
-            'series_id': series_obj.id,
-            'images': comic.images,
-        })
+        response['comics'].append(make_comic_dict(comic))
     return response
 
 

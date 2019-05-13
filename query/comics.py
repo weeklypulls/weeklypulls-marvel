@@ -2,9 +2,10 @@ import logging
 from operator import itemgetter
 
 import marvelous
-from query.api import get_api
+from query.api import get_api, make_comic_dict
 
 logger = logging.getLogger('flask.app')
+
 
 def week_of_day(day):
     print(f'Fetching week {day} from API')
@@ -19,12 +20,7 @@ def week_of_day(day):
         'limit': 100
     })
 
-    fetched = [{'id': comic.id,
-                'title': comic.title,
-                'on_sale': comic.dates.on_sale,
-                'series_id': comic.series.id,
-                'images': comic.images,
-                } for comic in comics]
+    fetched = [make_comic_dict(comic) for comic in comics]
 
     fetched.sort(key=itemgetter('title'))
     return fetched
@@ -63,3 +59,23 @@ def all_comics_for_series(series_obj):
             break
 
     return comics
+
+
+def comic_by_id(comic_id):
+    api = get_api()
+    # the api needs work...
+    api_result = api.call(['comics', comic_id])
+    if not api_result.get('code', 0) == 200:
+        return None
+    if not api_result.get('data', {}).get('count', 0) > 0:
+        return None
+    comic, errors = marvelous.comic.ComicSchema().load(
+        api_result['data']['results'][0])
+    if errors:
+        logger.error(
+            f"Errors in comic_by_id for id {comic_id}: {errors}")
+    if not hasattr(comic, 'id'):
+        logger.error(
+            f"Failed unmarshalling in comic_by_id, data was {api_result}")
+        return None
+    return make_comic_dict(comic)

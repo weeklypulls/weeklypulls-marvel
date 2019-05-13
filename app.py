@@ -8,7 +8,7 @@ from flask_cacheify import init_cacheify
 from flask_cors import CORS
 
 from marvelous.exceptions import ApiError
-from query.comics import week_of_day
+from query.comics import week_of_day, comic_by_id
 from query.series import get_ongoing, get_series_by_id, search_by_filter
 
 app = Flask(__name__)
@@ -115,6 +115,21 @@ def search_series():
     response = search_by_filter(filter)
     response_json = json.dumps(response, default=json_serial)
     cache.set(search_id, response_json, week_of_cache_time())
+    return response_json
+
+
+@app.route('/comics/<comic_id>', methods=['GET'])
+def get_comic(comic_id):
+    cache_id = f'comic_{comic_id}'
+    response = cache.get(cache_id)
+    if response:
+        return response
+
+    response = comic_by_id(comic_id)
+    if not response:
+        abort(404)
+    response_json = json.dumps(response, default=json_serial)
+    cache.set(cache_id, response_json, week_of_cache_time())
     return response_json
 
 
