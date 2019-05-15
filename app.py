@@ -102,7 +102,7 @@ def search_series():
     # map our querystring to acceptable Marvel API filters
     key_map = {'t': 'title'}
     filter = {key_map[key]: request.args[key]
-              for key in key_map
+              for key in sorted(key_map.keys())
               if key in request.args}
     # calculate an identifier to use with cache
     flat_filter = '||'.join([
