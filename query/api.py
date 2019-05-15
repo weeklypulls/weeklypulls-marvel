@@ -23,4 +23,5 @@ def make_comic_dict(comic_obj):
             'on_sale': comic_obj.dates.on_sale,
             'series_id': comic_obj.series.id,
             'images': comic_obj.images,
+            'unlimited': comic_obj.dates.unlimited
             }
