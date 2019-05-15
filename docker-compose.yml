@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  cache:
+    image: memcached:1.5-alpine
+    ports:
+      - "11211:11211"
+    restart: always
+    environment:
+      - MEMCACHIER_SERVERS=cache
+
+  web:
+    env_file:
+      - .env
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - cache
