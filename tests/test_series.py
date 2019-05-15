@@ -78,3 +78,15 @@ def test_get_week(client):
     start, end = arrow.get(day).span('week')
     assert all(start <= arrow.get(comic['on_sale']) <= end
                for comic in data['comics'])
+
+
+@my_vcr.use_cassette
+def test_aggregated(client):
+    series_ids = [23012, 2121]  # Weapon X (short series) + Fantastic Four (big series)
+    result = client.get(f'/aggregate?series={",".join(str(sid) for sid in series_ids)}')
+    data = json.loads(result.data)
+    assert len(data) == len(series_ids)
+    assert _structure_matches(_SERIES_ATTRIBUTES, data)
+    for series in data:
+        assert _structure_matches(_COMICS_ATTRIBUTES, series['comics'])
+        assert series['series_id'] in series_ids

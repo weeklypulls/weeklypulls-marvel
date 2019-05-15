@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import date, datetime
+from hashlib import sha1
 from random import randint
 
 from flask import Flask, render_template, abort, request
@@ -73,6 +74,50 @@ def series(series_id):
     response = get_series_by_id(series_id)
     response_json = json.dumps(response, default=json_serial)
     cache.set(series_id, response_json, series_cache_time())
+    return response_json
+
+
+@app.route('/aggregate', methods=['GET'])
+def series_list():
+    """
+    Given multiple series_id, return all details for them in a huge view.
+    This is basically testing the limits of the current approach.
+
+    It must be called with a comma-separated list of series IDs in querystring,
+    i.e. ?series=1234,5678,9012...
+    """
+    key = 'series'
+    if not key in request.args:
+        abort(400)
+    sids = request.args[key].split(',')
+    # validate format so we don't have to worry later
+    if not all(sid.isnumeric() for sid in sids):
+        abort(400)
+    # sort so cache key is consistent regardless of query order
+    sids.sort()
+    # generate plaintext cache key
+    cache_key_plain = '_'.join(sids)
+    # hash so we don't care about key length
+    # using sha1 because crypto strength is irrelevant here, we want speed
+    cache_key = 'aggregated_' + sha1(cache_key_plain.encode('ascii')).hexdigest()
+    response = cache.get(cache_key)
+    if response:
+        return response
+
+    # retrieve all the info, using cache if possible
+    aggregated_data = []
+    for sid in sids:
+        cached_series = cache.get(sid)
+        if not cached_series:
+            cache.set(sid, json.dumps(get_series_by_id(int(sid)),
+                                      default=json_serial))
+            cached_series = cache.get(sid)
+        aggregated_data.append(cached_series)
+
+    response_json = f'[{",".join(aggregated_data)}]'
+    # todo: here we should check the total size is not over 1mb.
+    # If it is, we need to compress it before caching
+    cache.set(cache_key, response_json, week_of_cache_time())
     return response_json
 
 
