@@ -23,10 +23,11 @@ RUN pip install -U pip
 RUN pip install -r requirements.txt
 
 ADD ./app.py /app/app.py
+ADD /query /app/query
 ADD ./templates /app/templates
 
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-EXPOSE 5000
+EXPOSE 5000:5000
