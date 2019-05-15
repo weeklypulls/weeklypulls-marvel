@@ -107,12 +107,15 @@ def series_list():
     # retrieve all the info, using cache if possible
     aggregated_data = []
     for sid in sids:
-        cached_series = cache.get(sid)
-        if not cached_series:
-            cache.set(sid, json.dumps(get_series_by_id(int(sid)),
-                                      default=json_serial))
+        try:
             cached_series = cache.get(sid)
-        aggregated_data.append(cached_series)
+            if not cached_series:
+                cache.set(sid, json.dumps(get_series_by_id(int(sid)),
+                                          default=json_serial))
+                cached_series = cache.get(sid)
+            aggregated_data.append(cached_series)
+        except Exception as e:
+            app.logger.error(f'Unexpected {type(e)} fetching series {sid}: {e}')
 
     response_json = f'[{",".join(aggregated_data)}]'
     # todo: here we should check the total size is not over 1mb.
