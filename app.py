@@ -77,7 +77,7 @@ def series(series_id):
     return response_json
 
 
-@app.route('/aggregate', methods=['GET'])
+@app.route('/series/aggregate', methods=['GET'])
 def series_list():
     """
     Given multiple series_id, return all details for them in a huge view.

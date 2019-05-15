@@ -83,7 +83,7 @@ def test_get_week(client):
 @my_vcr.use_cassette
 def test_aggregated(client):
     series_ids = [23012, 2121]  # Weapon X (short series) + Fantastic Four (big series)
-    result = client.get(f'/aggregate?series={",".join(str(sid) for sid in series_ids)}')
+    result = client.get(f'/series/aggregate?series={",".join(str(sid) for sid in series_ids)}')
     data = json.loads(result.data)
     assert len(data) == len(series_ids)
     assert _structure_matches(_SERIES_ATTRIBUTES, data)
