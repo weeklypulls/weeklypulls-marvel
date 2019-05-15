@@ -93,8 +93,8 @@ def series_list():
     # validate format so we don't have to worry later
     if not all(sid.isnumeric() for sid in sids):
         abort(400)
-    # sort so cache key is consistent regardless of query order
-    sids.sort()
+    # dedupe and sort so cache key is consistent regardless of query order
+    sids = sorted(set(sids))
     # generate plaintext cache key
     cache_key_plain = '_'.join(sids)
     # hash so we don't care about key length
