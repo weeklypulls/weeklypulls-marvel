@@ -99,6 +99,12 @@ def weeks(week_of: str):
 
 @app.route('/search/series', methods=['GET'])
 def search_series():
+    """
+    Return all series matching the provided querystring.
+    Supported parameters:
+        t=my+series+title
+    :return: lson list of series representations (without comics)
+    """
     # map our querystring to acceptable Marvel API filters
     key_map = {'t': 'title'}
     filter = {key_map[key]: request.args[key]
@@ -120,6 +126,11 @@ def search_series():
 
 @app.route('/comics/<comic_id>', methods=['GET'])
 def get_comic(comic_id):
+    """
+    Given an ID, return comic details
+    :param comic_id: int
+    :return: a json comic representation
+    """
     cache_id = f'comic_{comic_id}'
     response = cache.get(cache_id)
     if response:
