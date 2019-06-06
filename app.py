@@ -141,11 +141,12 @@ def weeks(week_of: str):
         'comics': week_of_day(week_of),
     }
     response_json = json.dumps(response, default=json_serial)
+    
     cache.set(week_of, response_json, week_of_cache_time())
     return response_json
 
 
-@app.route('/search/series', methods=['GET'])
+@app.route('/search/series/', methods=['GET'])
 def search_series():
     """
     Return all series matching the provided querystring.
@@ -154,10 +155,10 @@ def search_series():
     :return: json list of series representations (without comics)
     """
     # map our querystring to acceptable Marvel API filters
-    key_map = {'t': 'title'}
+    key_map = {'search': 'title'}
     filter = {key_map[key]: request.args[key]
               for key in sorted(key_map.keys())
-              if key in request.args}
+              if key in request.args and request.args[key] != ''}
     if not filter:
         abort(400)
     # calculate an identifier to use with cache
