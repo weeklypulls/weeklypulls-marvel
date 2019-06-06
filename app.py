@@ -99,7 +99,7 @@ def series_list():
     cache_key_plain = '_'.join(sids)
     # hash so we don't care about key length
     # using sha1 because crypto strength is irrelevant here, we want speed
-    cache_key = 'aggregated_' + sha1(cache_key_plain.encode('ascii')).hexdigest()
+    cache_key = 'aggr_' + sha1(cache_key_plain.encode('ascii')).hexdigest()
     response = cache.get(cache_key)
     if response:
         return response
