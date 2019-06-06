@@ -67,6 +67,11 @@ def test_series_search(client):
     assert _structure_matches(_SERIES_ATTRIBUTES, data)
     assert all(title in comic['title'] for comic in data)
 
+    result_empty = client.get('/search/series?wrong=true')
+    assert result_empty.status_code == 400
+    result_empty2 = client.get('/search/series')
+    assert result_empty2.status_code == 400
+
 
 @my_vcr.use_cassette
 def test_get_week(client):

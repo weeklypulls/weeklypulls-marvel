@@ -151,13 +151,15 @@ def search_series():
     Return all series matching the provided querystring.
     Supported parameters:
         t=my+series+title
-    :return: lson list of series representations (without comics)
+    :return: json list of series representations (without comics)
     """
     # map our querystring to acceptable Marvel API filters
     key_map = {'t': 'title'}
     filter = {key_map[key]: request.args[key]
               for key in sorted(key_map.keys())
               if key in request.args}
+    if not filter:
+        abort(400)
     # calculate an identifier to use with cache
     flat_filter = '||'.join([
         f'{key}::{value}' for key, value in filter.items()
