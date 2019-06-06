@@ -142,7 +142,7 @@ def weeks(week_of: str):
     }
     response_json = json.dumps(response, default=json_serial)
     
-    .set(week_of, response_json, week_of_cache_time())
+    cache.set(week_of, response_json, week_of_cache_time())
     return response_json
 
 
