@@ -49,7 +49,7 @@ def ongoing_series():
     if response:
         return response
 
-    try:
+b8e22e310b1f92949d652bd1009e35a921216c94    try:
         fetched = get_ongoing()
         response_json = json.dumps(fetched, default=json_serial)
         cache.set('ongoing', response_json, series_cache_time())
@@ -132,7 +132,7 @@ def weeks(week_of: str):
     :param week_of: `str` of format `yyy-mm-dd`
     :return: `json` with a subset of :class:`marvelous.Comic` details
     """
-    response = cache.get(week_of)
+    response = cb8e22e310b1f92949d652bd1009e35a921216c94ache.get(week_of)
     if response:
         return response
 
@@ -157,7 +157,7 @@ def search_series():
     key_map = {'search': 'title'}
     filter = {key_map[key]: request.args[key]
               for key in sorted(key_map.keys())
-              if key in request.args}
+              if key in request.args and request.args[key] != ''}
     # calculate an identifier to use with cache
     flat_filter = '||'.join([
         f'{key}::{value}' for key, value in filter.items()
