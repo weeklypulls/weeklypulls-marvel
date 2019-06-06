@@ -49,7 +49,7 @@ def ongoing_series():
     if response:
         return response
 
-b8e22e310b1f92949d652bd1009e35a921216c94    try:
+    try:
         fetched = get_ongoing()
         response_json = json.dumps(fetched, default=json_serial)
         cache.set('ongoing', response_json, series_cache_time())
@@ -132,7 +132,7 @@ def weeks(week_of: str):
     :param week_of: `str` of format `yyy-mm-dd`
     :return: `json` with a subset of :class:`marvelous.Comic` details
     """
-    response = cb8e22e310b1f92949d652bd1009e35a921216c94ache.get(week_of)
+    response = cache.get(week_of)
     if response:
         return response
 
@@ -141,7 +141,8 @@ def weeks(week_of: str):
         'comics': week_of_day(week_of),
     }
     response_json = json.dumps(response, default=json_serial)
-    cache.set(week_of, response_json, week_of_cache_time())
+    
+    .set(week_of, response_json, week_of_cache_time())
     return response_json
 
 
