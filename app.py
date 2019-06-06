@@ -145,7 +145,7 @@ def weeks(week_of: str):
     return response_json
 
 
-@app.route('/search/series', methods=['GET'])
+@app.route('/search/series/', methods=['GET'])
 def search_series():
     """
     Return all series matching the provided querystring.
@@ -154,7 +154,7 @@ def search_series():
     :return: lson list of series representations (without comics)
     """
     # map our querystring to acceptable Marvel API filters
-    key_map = {'t': 'title'}
+    key_map = {'search': 'title'}
     filter = {key_map[key]: request.args[key]
               for key in sorted(key_map.keys())
               if key in request.args}
