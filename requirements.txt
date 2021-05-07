@@ -7,7 +7,7 @@ gunicorn==19.9.0
 itsdangerous==0.24
 Jinja2==2.10.1
 MarkupSafe==0.23
-psycopg2==2.8.2
+psycopg2==2.8.5
 pylibmc==1.5.2
 Werkzeug==0.15.2
 safety
