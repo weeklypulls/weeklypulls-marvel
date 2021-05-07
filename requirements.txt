@@ -1,5 +1,5 @@
 click==6.6
-Flask-Cors==3.0.3
+Flask-Cors==3.0.9
 # Flask-Heroku-Cacheify fixed to use Flask-Caching instead of dead Flask-Cache
 https://github.com/toyg/flask-heroku-cacheify/archive/master.zip
 Flask>=0.12.3
