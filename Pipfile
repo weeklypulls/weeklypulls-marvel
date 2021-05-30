@@ -16,7 +16,7 @@ Flask-Heroku-Cacheify = {file = "https://github.com/toyg/flask-heroku-cacheify/a
 Flask = "==0.12.3"
 Jinja2 = "==2.10.1"
 MarkupSafe = "==0.23"
-Werkzeug = "==0.15.2"
+Werkzeug = "==0.15.3"
 
 [dev-packages]
 
