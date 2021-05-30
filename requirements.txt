@@ -2,14 +2,14 @@ click==6.6
 Flask-Cors==3.0.3
 # Flask-Heroku-Cacheify fixed to use Flask-Caching instead of dead Flask-Cache
 https://github.com/toyg/flask-heroku-cacheify/archive/master.zip
-Flask>=0.12.3
+Flask==0.12.3
 gunicorn==19.9.0
 itsdangerous==0.24
 Jinja2==2.10.1
 MarkupSafe==0.23
 psycopg2==2.8.5
 pylibmc==1.5.2
-Werkzeug==0.15.2
+Werkzeug==0.16.1
 safety
 # temporarily using a fork of the lib
 https://github.com/rkuykendall/marvelous/archive/toyg.zip
