@@ -24,8 +24,12 @@ if os.environ.get('MEMCACHIER_SERVERS'):
         'CACHE_MEMCACHED_USERNAME': os.environ.get('MEMCACHIER_USERNAME'),
         'CACHE_MEMCACHED_PASSWORD': os.environ.get('MEMCACHIER_PASSWORD'),
         'CACHE_OPTIONS': {
-            'binary': True,
-            'behaviors': {'tcp_nodelay': True, 'ketama': True}
+            'behaviors': {
+                'tcp_nodelay': True,
+                'ketama': True,
+                'no_block': True,
+                'binary': True  # binary protocol
+            }
         }
     }
 else:
