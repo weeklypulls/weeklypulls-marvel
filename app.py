@@ -20,17 +20,12 @@ CORS(app)
 if os.environ.get('MEMCACHIER_SERVERS'):
     cache_config = {
         'CACHE_TYPE': 'memcached',
+        'CACHE_DEFAULT_TIMEOUT': 300,
+        'CACHE_KEY_PREFIX': 'weeklypulls_',
         'CACHE_MEMCACHED_SERVERS': [os.environ.get('MEMCACHIER_SERVERS')],
         'CACHE_MEMCACHED_USERNAME': os.environ.get('MEMCACHIER_USERNAME'),
         'CACHE_MEMCACHED_PASSWORD': os.environ.get('MEMCACHIER_PASSWORD'),
-        'CACHE_OPTIONS': {
-            'behaviors': {
-                'tcp_nodelay': True,
-                'ketama': True,
-                'no_block': True,
-                'binary': True  # binary protocol
-            }
-        }
+        # Binary protocol and other behaviors are set by default in pylibmc
     }
 else:
     cache_config = {
