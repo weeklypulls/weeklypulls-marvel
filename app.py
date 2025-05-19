@@ -6,7 +6,7 @@ from random import randint
 from typing import Any, Dict, List, Optional
 
 from flask import Flask, abort, jsonify, request, render_template, make_response
-from flask_cacheify import init_cacheify
+from flask_caching import Cache
 from flask_cors import CORS
 
 from marvelous.exceptions import ApiError
@@ -15,7 +15,27 @@ from query.series import get_ongoing, get_series_by_id, search_by_filter
 
 app = Flask(__name__)
 CORS(app)
-cache = init_cacheify(app)
+
+# Configure caching - Use memcached in production, filesystem in development
+if os.environ.get('MEMCACHIER_SERVERS'):
+    cache_config = {
+        'CACHE_TYPE': 'memcached',
+        'CACHE_MEMCACHED_SERVERS': [os.environ.get('MEMCACHIER_SERVERS')],
+        'CACHE_MEMCACHED_USERNAME': os.environ.get('MEMCACHIER_USERNAME'),
+        'CACHE_MEMCACHED_PASSWORD': os.environ.get('MEMCACHIER_PASSWORD'),
+        'CACHE_OPTIONS': {
+            'binary': True,
+            'behaviors': {'tcp_nodelay': True, 'ketama': True}
+        }
+    }
+else:
+    cache_config = {
+        'CACHE_TYPE': 'filesystem',
+        'CACHE_DIR': 'flask_cache',
+        'CACHE_DEFAULT_TIMEOUT': 300
+    }
+
+cache = Cache(app, config=cache_config)
 
 _ONE_DAY_SECONDS = 60 * 60 * 24
 
