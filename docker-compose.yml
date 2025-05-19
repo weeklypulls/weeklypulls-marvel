@@ -1,13 +1,16 @@
-version: '3'
-
 services:
   cache:
-    image: memcached:1.5-alpine
+    image: memcached:alpine
     ports:
       - "11211:11211"
     restart: always
     environment:
-      - MEMCACHIER_SERVERS=cache
+      MEMCACHIER_SERVERS: cache
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "11211"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   web:
     env_file:
@@ -16,4 +19,6 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - cache
+      cache:
+        condition: service_healthy
+    restart: always

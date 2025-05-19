@@ -1,18 +1,17 @@
-FROM python:3.6-alpine3.9
+FROM python:3.11-alpine
 
 ENV PYTHONUNBUFFERED=0
 
 RUN apk add --no-cache gcc \
                        musl-dev \
-                       postgresql-dev \
+                       python3-dev \
+                       linux-headers \
                        libmemcached-dev \
                        cyrus-sasl-dev \
                        zlib-dev
 
-# For using early releases of marvelous
-RUN apk update && \
-   apk upgrade && \
-   apk add git
+# For installing packages from Git
+RUN apk add --no-cache git
 
 RUN mkdir /app
 
@@ -30,4 +29,4 @@ COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-EXPOSE 5000:5000
+EXPOSE 5000
